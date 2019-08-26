@@ -43,7 +43,7 @@ let p = name => print(file => console.log(name, file));
 gulp.task('default', ['build']);
 
 gulp.task('build', sequence(['clean:rev', 'clean:dist'],
-                            ['js:vendor', 'js:app', 'html', 'images', 'styles', 'fonts'],
+                            ['js:vendor', 'js:app', 'data', 'html', 'images', 'styles', 'fonts'],
                             ['minify:css', 'minify:html', 'minify:js', 'minify:images']/*,
                             'rev'*/));
 
@@ -51,7 +51,7 @@ gulp.task('dev', cb => {
   const {src} = paths;
 
   sequence('clean:dev',
-          ['js:vendor', 'js:app', 'html', 'images', 'styles', 'fonts'],
+          ['js:vendor', 'js:app', 'data', 'html', 'images', 'styles', 'fonts'],
           'browser-sync')(cb);
 
   gulp.watch(src.vendor,    ['js:vendor']);
@@ -162,6 +162,14 @@ gulp.task('sprites',
     ,gulp.dest(paths.dev.$)
   ]));
 
+gulp.task('data',
+  () => pipe([
+    gulp.src(paths.src.data)
+    ,p('data')
+    ,gulp.dest(paths.dev.$)
+    ,reload({stream: true})
+  ]));
+
 gulp.task('html',
   () => pipe([
     gulp.src(paths.src.html)
@@ -229,6 +237,7 @@ const paths = {
     less: ['src/**/*.less'],
     html: ['./src/index.html'],
     images: ['./src/**/*.{svg,gif,png,jpg}'],
+    data: ['./src/data/**'],
     scripts: ['src/**/*.js'],
     templates: ['src/modules/**/template.html'],
     vendor: ['!./node_modules/*/node_modules/**']

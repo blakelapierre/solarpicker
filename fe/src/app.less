@@ -2,3 +2,16 @@ body {
   margin: 0;
   padding: 0;
 }
+
+batteries {
+  display: table;
+}
+
+battery {
+  display: table-row;
+
+  &>* {
+    display: table-cell;
+    padding: 0.25em;
+  }
+}

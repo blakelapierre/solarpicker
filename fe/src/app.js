@@ -15,7 +15,8 @@ const invertersUrl = `${window.location.href}inverters`;
 const {
   INIT,
   SORT_BATTERIES,
-  SORT_INVERTERS
+  SORT_INVERTERS,
+  SELECT_COMPONENT_TYPE
 } = {
   INIT: (_, mutation) => {
     _.inited = true;
@@ -25,6 +26,8 @@ const {
     _.inverters = [];
 
     _.batteriesSortDir = 1;
+
+    _.selectedComponentType = 'Batteries';
 
     _.sortDir = {
       'batteries': 1,
@@ -43,7 +46,8 @@ const {
 	  results.data['wattHoursPerDollar'] =  results.data['watt-hours'] / results.data.price;
 	  mutation(_ => (_.batteries.push(results.data), _))();
 	}
-      }
+      },
+      complete: mutation(SORT_BATTERIES, 'wattHoursPerDollar', -1)
     });
 
     Papa.parse(invertersUrl, {
@@ -57,7 +61,8 @@ const {
           results.data['wattsPerDollar'] = results.data['wattage'] / results.data.price;
           mutation(_ => (_.inverters.push(results.data), _))();
 	}
-      }
+      },
+      complete: mutation(SORT_INVERTERS, 'wattsPerDollar', -1)
     });
   },
 
@@ -79,15 +84,27 @@ const {
       return 0;
     });
     return _;
+  },
+
+  SELECT_COMPONENT_TYPE: (_, type) => {
+    _.selectedComponentType = type;
+    return _;
   }
 };
 
 const INIT_GUI = ({}, {inited, mutation}) => inited ? <GUI /> : mutation(INIT)(mutation);
 
-const GUI = ({}, {}) => (
+const GUI = ({}, {selectedComponentType, mutation}) => (
   <gui>
-    <Batteries />
-    <Inverters />
+    <warning>WARNING: Prices and/or specs may be wrong. Products may not be suitable.</warning>
+    <component-types>
+      <type className={selectedComponentType === 'Batteries' ? 'selected' : undefined} onClick={mutation(SELECT_COMPONENT_TYPE, 'Batteries')}>Batteries</type>
+      <type className={selectedComponentType === 'Inverters' ? 'selected' : undefined} onClick={mutation(SELECT_COMPONENT_TYPE, 'Inverters')}>Inverters</type>
+      <type className={selectedComponentType === 'Panels' ? 'selected' : undefined} onClick={mutation(SELECT_COMPONENT_TYPE, 'Panels')}>Panels</type>
+    </component-types>
+    {selectedComponentType === 'Batteries' ? <Batteries /> : undefined}
+    {selectedComponentType === 'Inverters' ? <Inverters /> : undefined}
+    {selectedComponentType === 'Panels' ? 'None Yet' : undefined}
   </gui>
 );
 
@@ -112,7 +129,7 @@ const Battery = ({data}) => (
     <voltage>{data.voltage}</voltage>
     <amp-hours>{data['amp-hours']}</amp-hours>
     <watt-hours>{data['watt-hours']}</watt-hours>
-    <price>${data.price}</price>
+    <price>${(data.price || 0).toFixed(2)}</price>
     <watt-hours-per-dollar>{data['wattHoursPerDollar'].toFixed(2)}</watt-hours-per-dollar>
     <link><a href={data.url}>Amazon</a></link>
   </battery>
@@ -141,7 +158,7 @@ const Inverter = ({data}) => (
     <voltage-out>{data['voltage (out)']}</voltage-out>
     <frequency>{data['frequency']}</frequency>
     <efficiency>{data['efficiency']}</efficiency>
-    <price>{data['price']}</price>
+    <price>${(data['price'] || 0).toFixed(2)}</price>
     <watts-per-dollar>{(data['wattsPerDollar'] || 0).toFixed(2)}</watts-per-dollar>
     <link><a href={data['url']}>Amazon</a></link>
   </inverter>

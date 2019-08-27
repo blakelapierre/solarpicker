@@ -1,6 +1,29 @@
 body {
   margin: 0;
   padding: 0;
+
+  text-align: center;
+}
+
+gui {
+  display: inline-block;
+
+  component-types {
+    display: block;
+
+    margin: 0.25em 0;
+
+    &>* {
+      display: inline-block;
+      padding: 0.25em;
+      cursor: pointer;
+    }
+
+    .selected {
+      background-color: #ccc;
+      border-bottom: solid 1px #333;
+    }
+  }
 }
 
 batteries, inverters {
@@ -10,8 +33,14 @@ batteries, inverters {
 battery, inverter, thead {
   display: table-row;
 
+  th {
+    cursor: pointer;
+  }
+
   &>* {
     display: table-cell;
     padding: 0.25em;
+    text-align: right;
+    border: solid 1px #ccc;
   }
 }

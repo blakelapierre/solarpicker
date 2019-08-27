@@ -167,6 +167,7 @@ gulp.task('data',
     gulp.src(paths.src.data)
     ,p('data')
     ,gulp.dest(paths.dev.$)
+    ,gulp.dest(paths.rev.$)
     ,reload({stream: true})
   ]));
 

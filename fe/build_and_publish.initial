@@ -8,8 +8,6 @@ rm -rf .rev \
 && git init \
 && git checkout -b gh-pages \
 && git remote add origin https://github.com/blakelapierre/solarpicker \
-&& git pull origin gh-pages \
-&& git rm -r . \
 && cp  -r ../.rev/* . \
 && git add . \
 && git commit -m ".rev" \

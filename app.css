@@ -1,1 +1,1 @@
-body{margin:0;padding:0}batteries{display:table}battery{display:table-row}battery>*{display:table-cell;padding:.25em}
+body{margin:0;padding:0}batteries,inverters{display:table}battery,inverter,thead{display:table-row}battery>*,inverter>*,thead>*{display:table-cell;padding:.25em}

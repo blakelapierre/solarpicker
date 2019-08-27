@@ -105,6 +105,7 @@ const GUI = ({}, {selectedComponentType, mutation}) => (
     {selectedComponentType === 'Batteries' ? <Batteries /> : undefined}
     {selectedComponentType === 'Inverters' ? <Inverters /> : undefined}
     {selectedComponentType === 'Panels' ? 'None Yet' : undefined}
+    <includes>This page includes <a href="https://github.com/developit/preact-cycle">preact-cycle</a> and <a href="https://www.papaparse.com/">papaparse</a></includes>
   </gui>
 );
 

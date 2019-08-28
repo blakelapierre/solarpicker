@@ -11,11 +11,13 @@ function init() {
 
 const batteriesUrl = `${window.location.href}batteries`;
 const invertersUrl = `${window.location.href}inverters`;
+const panelsUrl = `${window.location.href}panels`;
 
 const {
   INIT,
   SORT_BATTERIES,
   SORT_INVERTERS,
+  SORT_PANELS,
   SELECT_COMPONENT_TYPE
 } = {
   INIT: (_, mutation) => {
@@ -24,6 +26,7 @@ const {
 
     _.batteries = [];
     _.inverters = [];
+    _.panels = [];
 
     _.batteriesSortDir = 1;
 
@@ -31,7 +34,8 @@ const {
 
     _.sortDir = {
       'batteries': 1,
-      'inverters': 1
+      'inverters': 1,
+      'panels': 1
     };
 
     Papa.parse(batteriesUrl, {
@@ -64,6 +68,22 @@ const {
       },
       complete: mutation(SORT_INVERTERS, 'wattsPerDollar', -1)
     });
+
+    Papa.parse(panelsUrl, {
+      download: true,
+      worker: true,
+      header: true, 
+      dynamicTyping: true,
+      step: (results) => {
+        console.log(results);
+	if (results.data && results.data['wattage']) {
+          results.data['wattsPerDollar'] = results.data['wattage'] / results.data.price;
+          mutation(_ => (_.panels.push(results.data), _))();
+	}
+      },
+      complete: mutation(SORT_PANELS, 'wattsPerDollar', -1)
+    });
+
   },
 
   SORT_BATTERIES: (_, attribute, dir = 1) => {
@@ -79,6 +99,16 @@ const {
   SORT_INVERTERS: (_, attribute, dir = 1) => {
     _.sortDir.inverters = dir;
     _.inverters = _.inverters.sort((a, b) => {
+      if (a[attribute] < b[attribute]) return -dir;
+      if (b[attribute] < a[attribute]) return dir;
+      return 0;
+    });
+    return _;
+  },
+
+  SORT_PANELS: (_, attribute, dir = 1) => {
+    _.sortDir.panels = dir;
+    _.panels = _.panels.sort((a, b) => {
       if (a[attribute] < b[attribute]) return -dir;
       if (b[attribute] < a[attribute]) return dir;
       return 0;
@@ -104,7 +134,7 @@ const GUI = ({}, {selectedComponentType, mutation}) => (
     </component-types>
     {selectedComponentType === 'Batteries' ? <Batteries /> : undefined}
     {selectedComponentType === 'Inverters' ? <Inverters /> : undefined}
-    {selectedComponentType === 'Panels' ? 'None Yet' : undefined}
+    {selectedComponentType === 'Panels' ? <Panels /> : undefined}
     <includes>This page includes <a href="https://github.com/developit/preact-cycle">preact-cycle</a> and <a href="https://www.papaparse.com/">papaparse</a></includes>
   </gui>
 );
@@ -132,7 +162,7 @@ const Battery = ({data}) => (
     <watt-hours>{data['watt-hours']}</watt-hours>
     <price>${(data.price || 0).toFixed(2)}</price>
     <watt-hours-per-dollar>{data['wattHoursPerDollar'].toFixed(2)}</watt-hours-per-dollar>
-    <link><a href={data.url}>Amazon</a></link>
+    <link><a href={data.url} target="_blank">Amazon</a></link>
   </battery>
 );
 
@@ -161,8 +191,33 @@ const Inverter = ({data}) => (
     <efficiency>{data['efficiency']}</efficiency>
     <price>${(data['price'] || 0).toFixed(2)}</price>
     <watts-per-dollar>{(data['wattsPerDollar'] || 0).toFixed(2)}</watts-per-dollar>
-    <link><a href={data['url']}>Amazon</a></link>
+    <link><a href={data['url']} target="_blank">Amazon</a></link>
   </inverter>
+);
+
+const Panels = ({}, {panels, sortDir, mutation}) => (
+  <panels>
+    <thead>
+      <th onClick={mutation(SORT_PANELS, 'voltage', -sortDir.panels)}>Voltage</th>
+      <th onClick={mutation(SORT_PANELS, 'wattage', -sortDir.panels)}>Wattage</th>
+      <th onClick={mutation(SORT_PANELS, 'weight', -sortDir.panels)}>Weight</th>
+      <th onClick={mutation(SORT_PANELS, 'price', -sortDir.panels)}>Price</th>
+      <th onClick={mutation(SORT_PANELS, 'wattsPerDollar', -sortDir.panels)}>Watts / $</th>
+      <th>Purchase Link</th>
+    </thead>
+    {panels.map(p => <Panel data={p} />)}
+  </panels>
+);
+
+const Panel = ({data}, {}) => (
+  <panel>
+    <voltage>{data.voltage}</voltage>
+    <wattage>{data.wattage}</wattage>
+    <weight>{data.weight}</weight>
+    <price>${(data.price || 0).toFixed(2)}</price>
+    <watts-per-dollar>{data.wattsPerDollar.toFixed(2)}</watts-per-dollar>
+    <link><a href={data['url']} target="_blank">Amazon</a></link>
+  </panel>
 );
 
 render(

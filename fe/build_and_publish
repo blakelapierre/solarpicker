@@ -7,10 +7,11 @@ rm -rf .rev \
 && cd .publish_stage \
 && git init \
 && git checkout -b gh-pages \
-&& git remote add origin https://github.com/blakelapierre/solarpicker \
+&& git remote add origin git@github.com:blakelapierre/solarpicker \
 && git pull origin gh-pages \
 && git rm -r . \
 && cp  -r ../.rev/* . \
+&& echo "solarpicker.club" > CNAME \
 && git add . \
 && git commit -m ".rev" \
 && git push origin gh-pages

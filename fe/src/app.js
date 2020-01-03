@@ -45,11 +45,12 @@ const {
       dynamicTyping: true,
       step: (results) => {
         console.log(results);
-	if (results.data && results.data.voltage) {
-	  results.data['watt-hours'] = results.data.voltage * results.data['amp-hours'];
-	  results.data['wattHoursPerDollar'] =  results.data['watt-hours'] / results.data.price;
-	  mutation(_ => (_.batteries.push(results.data), _))();
-	}
+      	if (results.data && results.data.voltage) {
+      	  results.data['watt-hours'] = results.data.voltage * results.data['amp-hours'];
+      	  results.data['wattHoursPerDollar'] =  results.data['watt-hours'] / results.data.price;
+          results.data['dollarsPerKiloWattHour'] = results.data.price / results.data['watt-hours'] * 1000;
+      	  mutation(_ => (_.batteries.push(results.data), _))();
+      	}
       },
       complete: mutation(SORT_BATTERIES, 'wattHoursPerDollar', -1)
     });
@@ -148,6 +149,7 @@ const Batteries = ({}, {batteries, batteriesSortDir, mutation}) => (
       <th onClick={mutation(SORT_BATTERIES, 'watt-hours', -batteriesSortDir)}>Watt-Hours</th>
       <th onClick={mutation(SORT_BATTERIES, 'price', -batteriesSortDir)}>Price</th>
       <th onClick={mutation(SORT_BATTERIES, 'wattHoursPerDollar', -batteriesSortDir)}>Watt-Hours / $</th>
+      <th onClick={mutation(SORT_BATTERIES, 'dollarsPerKiloWattHour', -batteriesSortDir)}>$ / kWh</th>
       <th>Purchase Link</th>
     </thead>
     {batteries.map(b => <Battery data={b} />)}
@@ -162,6 +164,7 @@ const Battery = ({data}) => (
     <watt-hours>{data['watt-hours']}</watt-hours>
     <price>${(data.price || 0).toFixed(2)}</price>
     <watt-hours-per-dollar>{data['wattHoursPerDollar'].toFixed(2)}</watt-hours-per-dollar>
+    <dollars-per-kilo-watt-hour>{data['dollarsPerKiloWattHour'].toFixed(2)}</dollars-per-kilo-watt-hour>
     <link><a href={data.url} target="_blank">Amazon</a></link>
   </battery>
 );
